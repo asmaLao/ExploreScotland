@@ -63,12 +63,41 @@ document.addEventListener("DOMContentLoaded", function () {
     toggleConfirmPasswordButton.addEventListener("mouseup", () => togglePasswordVisibility(confirmPasswordInput, false));
     toggleConfirmPasswordButton.addEventListener("mouseleave", () => togglePasswordVisibility(confirmPasswordInput, false));
 
-    window.handleRegister = function (event) {
+    window.handleRegister = async function (event) {
         event.preventDefault();
-        if (passwordInput.value === confirmPasswordInput.value && passwordInput.value !== "") {
-            window.location.href = "RegisterComplete.html";
-        } else {
-            alert("Please ensure all fields are valid before submitting.");
+        
+        if (passwordInput.value !== confirmPasswordInput.value || passwordInput.value === "") {
+            alert("Please ensure all fields are valid before submitting.")
+            return;
+        }
+
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        try {
+            const response = await fetch('https://localhost:7255/api/User/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (!response.ok){
+                const err = await response.json();
+                console.error('Registration failed: ', err)
+                alert(err.message || 'Registration failed. Please try again later.')
+                return;
+            }
+
+            const data = await response.json()
+            const token = data.token
+
+            localStorage.setItem('jwtToken', token)
+            window.location.href = 'RegisterComplete.html'
+        } catch(err) {
+            console.error('Error during registration', err)
+            alert('An error occurred. Please try again later.')
         }
     };
 });

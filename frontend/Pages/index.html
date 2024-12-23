@@ -316,5 +316,46 @@
 
   
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const signInButton = document.querySelector('.btn-secondary[href="login.html"]');
+        const navbar = document.querySelector('.navbar-nav');
+
+        if (isLoggedIn()) {
+          // Remove the "Sign in" button
+          if (signInButton) signInButton.remove();
+
+          // Add a "Logout" button
+          const logoutButton = document.createElement('li');
+          logoutButton.classList.add('nav-item', 'ms-2', 'd-none', 'd-md-inline');
+          logoutButton.innerHTML = `
+            <a class="btn btn-secondary" href="#" id="logout-button">Logout</a>
+        `;
+          navbar.appendChild(logoutButton);
+
+          // Add logout functionality
+          document.getElementById('logout-button').addEventListener('click', function () {
+            localStorage.removeItem('jwtToken');
+            alert('Logged out successfully!');
+            location.reload(); // Refresh the page
+          });
+        }
+      });
+
+      function isLoggedIn() {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) return false;
+
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
+          return payload.exp * 1000 > Date.now(); // Check token expiration
+        } catch (error) {
+          console.error('Error parsing token:', error);
+          return false;
+        }
+      }
+
+
+  </script>
 </body>
 </html>
